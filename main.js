@@ -3,7 +3,6 @@ let NutritionsList = ["Banane","Abricot","Poulet","Dinde","Vin"];
 
 
 var btnInfos = document.querySelector('#btnInfos');
-
 btnInfos.addEventListener('click',()=>{
     let infos = document.querySelector("#InfosDiv");
     let calculs = document.querySelector("#CalculsDiv");
@@ -40,14 +39,35 @@ btnNutritions.addEventListener('click',()=>{
     var parent = document.querySelector('#parent');
     var div = document.createElement('div');
     div.setAttribute("id","CalculsDiv");
-    var p = document.createElement('p');
+    div.setAttribute('class','row m-2 text-center justify-content-center')
+    
+    let selectDiv = document.createElement("div");
+    selectDiv.setAttribute('class','col ');
     var select = CreateSelectList(NutritionsList);
-    p.appendChild(select);
-    div.appendChild(p);
-    parent.appendChild(div);
-
+    selectDiv.appendChild(select);
+    select.setAttribute('class',"form-control form-control-lg")
+    
+    let btnDiv = document.createElement("div");
+    btnDiv.setAttribute("class","col");
+    var btnValider = document.createElement('button');
+    btnValider.setAttribute("id","btnValider");
+    btnValider.textContent = "Valider";
+    btnValider.setAttribute("class","btn btn-success btn-lg btn-block");
+    btnDiv.appendChild(btnValider);
+    
+    div.appendChild(selectDiv);
+    div.appendChild(btnDiv);
+    parent.appendChild(div); 
+    let calculBtn = document.querySelector('#btnValider');
+    calculBtn.addEventListener('click',()=>{
+        var e = document.querySelector("#NutritionsList");
+        var strUser = e.options[e.selectedIndex].value;
+        console.log(strUser);
+    })
 }
 )
+
+
 
 
 function RemoveDiv(div) {
@@ -61,14 +81,13 @@ function ShowDiv(div) {
 }
 
 function CreateSelectList(list) {
-    console.log("---------");
     let selectlist = document.createElement("select");
     selectlist.setAttribute("id","NutritionsList");
     list.forEach(item =>{
-        console.log(item);
         let option = document.createElement("option");
         option.value = item;
         option.text = item;
+        option.style.fontSize = "30pt";
         selectlist.appendChild(option);
     })
     return selectlist;
