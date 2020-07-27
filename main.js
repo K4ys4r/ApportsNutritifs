@@ -144,7 +144,7 @@ function Nutriment(nom,cal,mg,fe,ca,k,na,ph,prt,glu,lip) {
     this.glucides = glu;
     this.lipides = lip; 
     this.toString = function () {
-        return "<td>"+this.nom+"</td>" +
+        return "<th>"+this.nom+"</th>" +
                "<td>"+this.calories+"</td>" +
                "<td>"+this.protides+"</td>" +
                "<td>"+this.glucides+"</td>" +
