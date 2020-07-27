@@ -1,6 +1,3 @@
-
-//let NutritionsList = ["---Choisissez un nutriment---","Banane","Abricot","Poulet","Dinde","Vin"];
-
 var btnInfos = document.querySelector('#btnInfos');
 btnInfos.addEventListener('click',()=>{
     let calculs = document.querySelector("#CalculsDiv");
@@ -68,6 +65,7 @@ btnNutritions.addEventListener('click',()=>{
         var e = document.querySelector("#NutritionsList");
         var nutriment = e.options[e.selectedIndex].value;
         GetApportsNutritifs(nutriment);
+        e.value = "---Choisissez un nutriment---";
     })
 
     let apportsDiv = document.createElement('div');
@@ -86,6 +84,9 @@ btnNutritions.addEventListener('click',()=>{
     tab.appendChild(tabHead);
     let bodyTab = document.createElement('tbody');
     tab.appendChild(bodyTab);
+    let footTab = document.createElement('tfoot');
+    footTab.setAttribute('class','footer bg-warning')
+    tab.appendChild(footTab);
     apportsDiv.appendChild(tab);
     parent.appendChild(apportsDiv);
 
@@ -96,14 +97,33 @@ btnNutritions.addEventListener('click',()=>{
 
 function GetApportsNutritifs(nutriment) {
     //let tab = document.querySelector('#apportsTab');
-    var tableRef = document.getElementById('apportsTab').getElementsByTagName('tbody')[0];
+    var tableRef = document.getElementById('apportsTab');
+    var bodyTab = tableRef.getElementsByTagName('tbody')[0];
 
-    if (tableRef && NutrimentsList.map(item => item.nom).includes(nutriment)) {
-        console.log(tableRef);
-        var newNutriment = tableRef.insertRow();
+    if (bodyTab && NutrimentsList.map(item => item.nom).includes(nutriment)) {
+        var newNutriment = bodyTab.insertRow();
         // newNutriment.innerHTML = "<td>Nom</td> <td>1</td> <td>2</td> <td>3</td> <td>5</td> <td>6</td> <td>7</td> <td>8</td> <td>9</td> <td>10</td> <td>11</td>";
         newNutriment.innerHTML = NutrimentsList.filter(item => item.nom === nutriment).toString();
+        var nutrimentsSum = [];
+        for (let i = 1; i< bodyTab.rows[0].cells.length; i++) {
+            let sum = 0;
+            for (let j = 0; j < bodyTab.rows.length; j++) {
+                let info = bodyTab.rows[j].cells[i].innerHTML;
+
+                sum+= parseFloat(info)>=0 ?parseFloat(info):0; 
+            }
+            nutrimentsSum.push(RemoveZeroFixed(sum.toFixed(2)));
+        }
+        nutrimentsSum.unshift("Total");
+        var footTab = tableRef.getElementsByTagName('tfoot')[0];
+        footTab.innerHTML = new Nutriment(...nutrimentsSum).toString().replaceAll('td','th');
+        
     }
+}
+
+
+function RemoveZeroFixed(n) {
+    return (n*100/100)==parseInt(n)?parseInt(n):n; 
 }
 
 
@@ -131,7 +151,7 @@ function CreateSelectList(list) {
     return selectlist;
 }
 
-function Nutriment(nom,cal,mg,fe,ca,k,na,ph,prt,glu,lip) {
+function Nutriment(nom,cal,prt,glu,lip,mg,fe,ca,k,na,ph) {
     this.nom = nom;
     this.calories = cal;
     this.magnesium = mg;
