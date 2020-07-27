@@ -72,7 +72,7 @@ btnNutritions.addEventListener('click',()=>{
     apportsDiv.setAttribute("id","apportsNutritifs");
     apportsDiv.setAttribute("class","col  mt-4");
     let tab = document.createElement('table');
-    tab.setAttribute('class','table table-striped')
+    tab.setAttribute('class','table table-striped table-responsive')
     tab.setAttribute('id','apportsTab');
     let tabHeadItems = ['Nutriment','Calories','Protides','Glucides','Lipides','Magnésium','Fer','Calcium','Potassium','Sodium','Phosphore'];
     let tabHead = document.createElement('thead');
@@ -89,14 +89,10 @@ btnNutritions.addEventListener('click',()=>{
     tab.appendChild(footTab);
     apportsDiv.appendChild(tab);
     parent.appendChild(apportsDiv);
-
-}
-)
-
+})
 
 
 function GetApportsNutritifs(nutriment) {
-    //let tab = document.querySelector('#apportsTab');
     var tableRef = document.getElementById('apportsTab');
     var bodyTab = tableRef.getElementsByTagName('tbody')[0];
 
@@ -104,28 +100,54 @@ function GetApportsNutritifs(nutriment) {
         var newNutriment = bodyTab.insertRow();
         // newNutriment.innerHTML = "<td>Nom</td> <td>1</td> <td>2</td> <td>3</td> <td>5</td> <td>6</td> <td>7</td> <td>8</td> <td>9</td> <td>10</td> <td>11</td>";
         newNutriment.innerHTML = NutrimentsList.filter(item => item.nom === nutriment).toString();
-        var nutrimentsSum = [];
-        for (let i = 1; i< bodyTab.rows[0].cells.length; i++) {
-            let sum = 0;
-            for (let j = 0; j < bodyTab.rows.length; j++) {
-                let info = bodyTab.rows[j].cells[i].innerHTML;
-
-                sum+= parseFloat(info)>=0 ?parseFloat(info):0; 
-            }
-            nutrimentsSum.push(RemoveZeroFixed(sum.toFixed(2)));
-        }
-        nutrimentsSum.unshift("Total");
-        var footTab = tableRef.getElementsByTagName('tfoot')[0];
-        footTab.innerHTML = new Nutriment(...nutrimentsSum).toString().replaceAll('td','th');
+        let btnD = newNutriment.insertCell();
+        btnD.innerHTML = "<button class='close' onclick='getRowIndex(this)'>&times</button>";       
+        
+        var nutrimentsSum = getNutrimentsSum(bodyTab);
+        setFooterTab(nutrimentsSum);
         
     }
 }
 
 
+function setFooterTab(nutrimentsSum) {
+    var tableRef = document.getElementById('apportsTab');
+    var footTab = tableRef.getElementsByTagName('tfoot')[0];
+    if (nutrimentsSum==0) {
+        footTab.innerHTML = "";        
+    }else{
+        nutrimentsSum.unshift("Total");
+        footTab.innerHTML = new Nutriment(...nutrimentsSum).toString().replaceAll('td','th'); 
+    }
+}
+
+function getNutrimentsSum(bodyTab) {
+    if(bodyTab.rows.length==0){
+        return 0;
+    }
+    let nutrimentsSum = []
+    for (let i = 1; i< bodyTab.rows[0].cells.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < bodyTab.rows.length; j++) {
+            let info = bodyTab.rows[j].cells[i].innerHTML;
+            sum+= parseFloat(info)>=0 ?parseFloat(info):0; 
+        }
+        nutrimentsSum.push(RemoveZeroFixed(sum.toFixed(2)));
+    }
+    return nutrimentsSum
+}
+
+function getRowIndex(element) {
+    let tab = document.querySelector('#apportsTab');
+    tab.deleteRow(element.parentNode.parentNode.rowIndex);
+    var bodyTab = tab.getElementsByTagName('tbody')[0];
+    var nutrimentsSum = getNutrimentsSum(bodyTab);
+    setFooterTab(nutrimentsSum);
+}
+
 function RemoveZeroFixed(n) {
     return (n*100/100)==parseInt(n)?parseInt(n):n; 
 }
-
 
 function RemoveDiv(div) {
     div.remove();
@@ -145,7 +167,6 @@ function CreateSelectList(list) {
         let option = document.createElement("option");
         option.value = item;
         option.text = item;
-        option.style.fontSize = "30pt";
         selectlist.appendChild(option);
     })
     return selectlist;
@@ -194,15 +215,15 @@ function httpGet(url,callback) {
 // Appel la fonction pour lire le fichier et creer la liste des nutriments.
 var NutrimentsList = [];
 httpGet("https://dl.dropboxusercontent.com/s/7hufre0y07murfx/Nutriments.data?dl=0",function(params) {
-  array = params.split('\n');
-  array.forEach(item => {
-    let info = item.split(' ');
-    if (info.length === 11) {
-        let nutriment = new Nutriment(info[0],info[1],info[2],
-                                      info[3],info[4],info[5],
-                                      info[6],info[7],info[8],
-                                      info[9],info[10]);
-        NutrimentsList.push(nutriment);
-    }
-  })
-  });
+    array = params.split('\n');
+    array.forEach(item => {
+        let info = item.split(' ');
+        if (info.length === 11) {
+            let nutriment = new Nutriment(info[0],info[1],info[2],
+                                          info[3],info[4],info[5],
+                                          info[6],info[7],info[8],
+                                          info[9],info[10]);
+            NutrimentsList.push(nutriment);
+        }
+    })
+});
