@@ -1,3 +1,12 @@
+let femme1 = new Personne("Femme","Sédentaire","1800");
+let femme2 = new Personne("Femme","Activité habituelle","2000");
+let femme3 = new Personne("Femme","Activité importante","2200 à 2400");
+let homme1 = new Personne("Homme","Sédentaire","2100");
+let homme2 = new Personne("Homme","Activité habituelle","2500");
+let homme3 = new Personne("Homme","Activité importante","3000 à 3500");
+
+
+
 var btnInfos = document.querySelector('#btnInfos');
 btnInfos.addEventListener('click',()=>{
     let calculs = document.querySelector("#CalculsDiv");
@@ -23,6 +32,7 @@ btnInfos.addEventListener('click',()=>{
     }
 }
 )
+
 
 var btnNutritions = document.querySelector('#btnNutritions');
 btnNutritions.addEventListener('click',()=>{
@@ -53,7 +63,7 @@ btnNutritions.addEventListener('click',()=>{
     btnDiv.setAttribute("class","col");
     var btnValider = document.createElement('button');
     btnValider.setAttribute("id","btnValider");
-    btnValider.textContent = "Valider";
+    btnValider.textContent = "Afficher les apports nutritifs";
     btnValider.setAttribute("class","btn btn-success btn-lg btn-block");
     btnDiv.appendChild(btnValider);
     
@@ -72,9 +82,9 @@ btnNutritions.addEventListener('click',()=>{
     apportsDiv.setAttribute("id","apportsNutritifs");
     apportsDiv.setAttribute("class","col  mt-4");
     let tab = document.createElement('table');
-    tab.setAttribute('class','table table-striped table-responsive')
+    tab.setAttribute('class','table table-striped table-responsive text-center align-middle')
     tab.setAttribute('id','apportsTab');
-    let tabHeadItems = ['Nutriment','Calories','Protides','Glucides','Lipides','Magnésium','Fer','Calcium','Potassium','Sodium','Phosphore'];
+    let tabHeadItems = ['Nutriment (100 g)','Calories (cal)','Protides (g)','Glucides (g)','Lipides (g)','Magnésium (mg)','Fer (mg)','Calcium (mg)','Potassium (mg)','Sodium (mg)','Phosphore (mg)'];
     let tabHead = document.createElement('thead');
     tabHeadItems.forEach(item =>{
         let th = document.createElement('th')
@@ -93,19 +103,20 @@ btnNutritions.addEventListener('click',()=>{
 
 
 function GetApportsNutritifs(nutriment) {
+    var nutrimentExist = NutrimentsList.map(item => item.nom).includes(nutriment);
+    if(!nutrimentExist){
+        alert("Veuillez choisir un nutriment parmi la liste!");
+    }
     var tableRef = document.getElementById('apportsTab');
     var bodyTab = tableRef.getElementsByTagName('tbody')[0];
 
-    if (bodyTab && NutrimentsList.map(item => item.nom).includes(nutriment)) {
+    if (bodyTab && nutrimentExist) {
         var newNutriment = bodyTab.insertRow();
-        // newNutriment.innerHTML = "<td>Nom</td> <td>1</td> <td>2</td> <td>3</td> <td>5</td> <td>6</td> <td>7</td> <td>8</td> <td>9</td> <td>10</td> <td>11</td>";
         newNutriment.innerHTML = NutrimentsList.filter(item => item.nom === nutriment).toString();
         let btnD = newNutriment.insertCell();
-        btnD.innerHTML = "<button class='close' onclick='getRowIndex(this)'>&times</button>";       
-        
+        btnD.innerHTML = "<button class='close' onclick='getRowIndex(this)'><i class='fa fa-trash'></i></button>";       
         var nutrimentsSum = getNutrimentsSum(bodyTab);
-        setFooterTab(nutrimentsSum);
-        
+        setFooterTab(nutrimentsSum);        
     }
 }
 
@@ -173,17 +184,17 @@ function CreateSelectList(list) {
 }
 
 function Nutriment(nom,cal,prt,glu,lip,mg,fe,ca,k,na,ph) {
-    this.nom = nom;
-    this.calories = cal;
-    this.magnesium = mg;
-    this.calcium = ca;
+    this.nom = nom,
+    this.calories = cal,
+    this.magnesium = mg,
+    this.calcium = ca,
     this.sodium = na,
     this.potassium = k,
     this.phosphore = ph,
-    this.fer = fe;
-    this.protides = prt;
-    this.glucides = glu;
-    this.lipides = lip; 
+    this.fer = fe,
+    this.protides = prt,
+    this.glucides = glu,
+    this.lipides = lip,
     this.toString = function () {
         return "<th>"+this.nom+"</th>" +
                "<td>"+this.calories+"</td>" +
@@ -196,6 +207,16 @@ function Nutriment(nom,cal,prt,glu,lip,mg,fe,ca,k,na,ph) {
                "<td>"+this.potassium+"</td>" +
                "<td>"+this.sodium+"</td>" +
                "<td>"+this.phosphore+"</td>";
+    }
+}
+
+
+function Personne(genre,nature,cal) {
+    this.genre = genre,
+    this.nature = nature,
+    this.calories = cal,
+    this.toString = function () {
+        return this.nature + this.calories;
     }
 }
 
@@ -219,10 +240,7 @@ httpGet("https://dl.dropboxusercontent.com/s/7hufre0y07murfx/Nutriments.data?dl=
     array.forEach(item => {
         let info = item.split(' ');
         if (info.length === 11) {
-            let nutriment = new Nutriment(info[0],info[1],info[2],
-                                          info[3],info[4],info[5],
-                                          info[6],info[7],info[8],
-                                          info[9],info[10]);
+            let nutriment = new Nutriment(...info);
             NutrimentsList.push(nutriment);
         }
     })
