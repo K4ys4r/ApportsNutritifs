@@ -1,11 +1,3 @@
-let femme1 = new Personne("Femme","Sédentaire","1800");
-let femme2 = new Personne("Femme","Activité habituelle","2000");
-let femme3 = new Personne("Femme","Activité importante","2200 à 2400");
-let homme1 = new Personne("Homme","Sédentaire","2100");
-let homme2 = new Personne("Homme","Activité habituelle","2500");
-let homme3 = new Personne("Homme","Activité importante","3000 à 3500");
-
-
 
 var btnInfos = document.querySelector('#btnInfos');
 btnInfos.addEventListener('click',()=>{
@@ -18,27 +10,38 @@ btnInfos.addEventListener('click',()=>{
         RemoveDiv(apportsdiv);
     }
     let infos = document.querySelector("#InfosDiv");
-    if (!infos) {
-        var parent = document.querySelector('#parent');
-        var div = document.createElement('div');
-        div.setAttribute("id","InfosDiv")
-        var p = document.createElement('p');
-        var s = document.createTextNode("Salut Tous le monde");
-        p.appendChild(s);
-        div.appendChild(p)
-        parent.appendChild(div);
-    }else{
-        ShowDiv(infos);
+    if (infos) {
+        RemoveDiv(infos)
     }
+    var parent = document.querySelector('#parent');
+    var divInfos = document.createElement('div');
+    divInfos.setAttribute("id","InfosDiv")
+    divInfos.setAttribute("class","row justify-content-center");
+    
+    divInfos.appendChild(createButtonInfos("Femme",'btn-danger'))
+    divInfos.appendChild(createButtonInfos("Homme","btn-success"))
+    divInfos.appendChild(createButtonInfos("Ados","btn-secondary"))
+    divInfos.appendChild(createButtonInfos("Enfants"))
+    parent.appendChild(divInfos);
 }
 )
+
+function createButtonInfos(genre,btnClass = "btn-primary") {
+    let btn = document.createElement('button');
+    btn.setAttribute("class","btn col m-2 "+btnClass);
+    btn.textContent = genre;
+    btn.addEventListener('click',()=>{
+        GetApportsQuotidiens(genre);
+    })
+    return btn
+}
 
 
 var btnNutritions = document.querySelector('#btnNutritions');
 btnNutritions.addEventListener('click',()=>{
     let infos = document.querySelector("#InfosDiv");
     if(infos){
-        HideDiv(infos);
+        RemoveDiv(infos);
     }
     let claculs = document.querySelector("#CalculsDiv")
     if(claculs){
@@ -48,6 +51,11 @@ btnNutritions.addEventListener('click',()=>{
     if (apportsdiv) {
         RemoveDiv(apportsdiv);
     }
+    let divApports = document.querySelector("#divApportsQuotidien");
+    if (divApports) {
+        RemoveDiv(divApports);
+    }
+
     var parent = document.querySelector('#parent');
     var div = document.createElement('div');
     div.setAttribute("id","CalculsDiv");
@@ -82,7 +90,7 @@ btnNutritions.addEventListener('click',()=>{
     apportsDiv.setAttribute("id","apportsNutritifs");
     apportsDiv.setAttribute("class","col  mt-4");
     let tab = document.createElement('table');
-    tab.setAttribute('class','table table-striped table-responsive text-center align-middle')
+    tab.setAttribute('class','table table-striped table-responsive text-center align-middle rounded')
     tab.setAttribute('id','apportsTab');
     let tabHeadItems = ['Nutriment (100 g)','Calories (cal)','Protides (g)','Glucides (g)','Lipides (g)','Magnésium (mg)','Fer (mg)','Calcium (mg)','Potassium (mg)','Sodium (mg)','Phosphore (mg)'];
     let tabHead = document.createElement('thead');
@@ -100,6 +108,29 @@ btnNutritions.addEventListener('click',()=>{
     apportsDiv.appendChild(tab);
     parent.appendChild(apportsDiv);
 })
+
+
+function GetApportsQuotidiens(genre) {
+    let divApports = document.querySelector("#divApportsQuotidien");
+    if (divApports) {
+        RemoveDiv(divApports);
+    }
+    let genreApports = ApportsQuotidiens.filter(item => item.genre==genre);
+    let infosDiv = document.querySelector("#parent");
+    let div = document.createElement('div');
+    div.setAttribute("id","divApportsQuotidien");
+    let tab = document.createElement('table');
+    tab.setAttribute("class","table mt-3 text-center table-striped rounded");
+    let tabHead = document.createElement('thead');
+    tabHead.innerHTML = "<th>" + genreApports[0].genre + "</th><th> Calories</th>"
+    genreApports.forEach(item =>{
+        let row = tab.insertRow();
+        row.innerHTML = item.toString();
+    })
+    tab.appendChild(tabHead);
+    div.appendChild(tab);
+    infosDiv.appendChild(div);
+}
 
 
 function GetApportsNutritifs(nutriment) {
@@ -161,7 +192,7 @@ function RemoveZeroFixed(n) {
 }
 
 function RemoveDiv(div) {
-    div.remove();
+    div.remove(div);
 }
 function HideDiv(div) {
     div.setAttribute("style","display:none");
@@ -216,10 +247,9 @@ function Personne(genre,nature,cal) {
     this.nature = nature,
     this.calories = cal,
     this.toString = function () {
-        return this.nature + this.calories;
+        return `<td>${this.nature}</td> <td>${this.calories}</td>`;
     }
 }
-
 
 //Lire le fichier qui contient toutes les information sur les nutriments.
 function httpGet(url,callback) {
@@ -245,3 +275,16 @@ httpGet("https://dl.dropboxusercontent.com/s/7hufre0y07murfx/Nutriments.data?dl=
         }
     })
 });
+
+var ApportsQuotidiens = [];
+httpGet("https://dl.dropboxusercontent.com/s/96yg3xec7gkblmm/ApportsEnergetiqueQuotidiens.data?dl=0",function (params) {
+    array = params.split("\n");
+    array.forEach(item =>{
+        let info = item.split(",").map(item=> item.trim());
+        if (info.length === 3) {
+            let p = new Personne(...info);
+            ApportsQuotidiens.push(p);
+        }    
+    })
+})
+
